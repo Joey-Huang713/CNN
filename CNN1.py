@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 from torch.autograd import Variable
 import time
 
-path = "./CNN_data/1214GASF_Data"
+path = "./CNN_data/Laser_Data"
 transform = transforms.Compose([transforms.Resize(224),
                                 transforms.ToTensor(),
                                 transforms.Normalize([0.5,0.5,0.5], [0.5,0.5,0.5])])
@@ -17,7 +17,7 @@ data_image = {x:datasets.ImageFolder(root = os.path.join(path,x),
               for x in ["train", "val"]}
 
 data_loader_image = {x:torch.utils.data.DataLoader(dataset=data_image[x],
-                                                batch_size = 2,
+                                                batch_size = 20,
                                                 shuffle = True)
                      for x in ["train", "val"]}
 use_gpu = torch.cuda.is_available()
@@ -50,9 +50,10 @@ if use_gpu:
     model = model.cuda()
 
 cost = torch.nn.CrossEntropyLoss()
+#cost = torch.nn.MSELoss()
 optimizer = torch.optim.SGD(model.classifier.parameters(), lr=0.001, momentum=0.9)
 
-n_epochs = 2000
+n_epochs = 100
 
 for epoch in range(n_epochs):
     since = time.time()
@@ -78,7 +79,9 @@ for epoch in range(n_epochs):
             optimizer.zero_grad()
             y_pred = model(X)
             _, pred = torch.max(y_pred.data, 1)
-
+            # print("y_pred:{}".format(y_pred))
+            # print("y:{}".format(y))
+            # print ("pred:{}".format(pred))
             loss = cost(y_pred, y)
             if param == "train":
                 loss.backward()
